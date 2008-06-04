@@ -72,24 +72,21 @@ requires Catalyst::Plugin::Session module, in your application class:
 in your controller class:
 
     use base qw(Catalyst::Controller::RequestToken);
-
+    
     sub form :Local {
         my ($self, $c) = @_;
-
         $c->stash->{template} = 'form.tt';
         $c->forward($c->view('TT'));
     }
-
+    
     sub confirm :Local :CreateToken {
         my ($self, $c) = @_;
-
         $c->stash->{template} = 'confirm.tt';
         $c->forward($c->view('TT'));
     }
     
     sub complete :Local :ValidateToken {
         my ($self, $c) = @_;
-
         if ($self->validate_token) {
             $c->response->body('complete.');
         } eles {
@@ -97,9 +94,8 @@ in your controller class:
         }    
     }
 
-templates:
-
 form.tt
+
     <html>
     <body>
     <form action="confirm" method="post">
@@ -109,6 +105,7 @@ form.tt
     </html>
 
 confirm.tt
+
     <html>
     <body>
     <form action="complete" method="post">
@@ -137,18 +134,58 @@ failed, if user request with expired token.
 
 =head1 METHODS
 
+=over 4
+
 =item validate_token
 
 Return token is valid or not.  This will work collectlly only after
 ValidateToken.
 
+=back
+
+=head1 CONFIGRATION
+
+in your application class:
+
+    __PACKAGE__->config('Controller::RequestToken' => {
+        session_name => '_token',
+        request_name => '_token',
+    });
+
+=over 4
+
+=item session_name
+
+Default: _token
+
+=item request_name
+
+Default: _token
+
+=back
+
+=head1 INTERNAL METHODS
+
+=over 4
+
+=item new
+
+=item ACCEPT_CONTEXT
+
+=back
+
 =head1 SEE ALSO
 
-L<Catalyst>, L<Catalyst::Plugin::Session>, L<Catalyst::Plugin::FormValidator::Simple>
+L<Catalyst::Controller::RequestToken::Action::CreateToken>
+L<Catalyst::Controller::RequestToken::Action::ValidateToken>
+L<Catalyst>
+L<Catalyst::Controller>
+L<Catalyst::Plugin::Session>
+L<Catalyst::Plugin::FormValidator::Simple>
 
 =head1 AUTHOR
 
-Hideo Kimura <hideo.kimura@kddi-web.com>
+Hideo Kimura C<< <<hide@hide-k.net>> >>
 
 =head1 COPYRIGHT
 
