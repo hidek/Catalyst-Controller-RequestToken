@@ -2,7 +2,7 @@ package Catalyst::Controller::RequestToken;
 
 use strict;
 use warnings;
-use NEXT;
+
 
 use base qw(Catalyst::Controller);
 
@@ -60,6 +60,22 @@ sub _parse_ValidateToken_attr {
 
     return ( ActionClass => 'Catalyst::Controller::RequestToken::Action::ValidateToken' );
 }
+
+sub _parse_RemoveToken_attr {
+    my ( $self, $app_class, $action_name, $vaue, $attrs ) = @_;
+
+    return ( ActionClass => 'Catalyst::Controller::RequestToken::Action::RemoveToken' );
+}
+
+sub _parse_ValidateRemoveToken_attr {
+    my ( $self, $app_class, $action_name, $vaue, $attrs ) = @_;
+
+    return ( ActionClass => 'Catalyst::Controller::RequestToken::Action::ValidateRemoveToken' );
+}
+
+1;
+
+__END__
 
 =head1 NAME
 
@@ -204,4 +220,3 @@ LICENSE file included with this module.
 
 =cut
 
-1;

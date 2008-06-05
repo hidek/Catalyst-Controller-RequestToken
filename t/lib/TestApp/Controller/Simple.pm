@@ -4,28 +4,29 @@ use warnings;
 
 use base 'Catalyst::Controller::RequestToken';
 
-sub form : Local {
+sub form : Local CreateToken {
     my ( $self, $c ) = @_;
 
-    my $html = <<HTML;
+    $c->stash->{html} = <<HTML;
 <html>
 <head></head>
 <body>
 FORM
 <form action="confirm" method="post">
+<input type="hidden" name="_token" value="TOKEN"/>
 <input type="submit" name="submit" value="submit"/>
 </form>
 </body>
 </html>
 HTML
 
-$c->response->body($html);
+    $c->forward('parse_html');
 }
 
-sub confirm : Local : CreateToken {
+sub confirm : Local ValidateToken {
     my ( $self, $c ) = @_;
-    
-    my $html = <<HTML;
+
+    $c->stash->{html} = <<HTML;
 <html>
 <body>
 CONFIRM
@@ -36,26 +37,38 @@ CONFIRM
 </body>
 </html>
 HTML
-
-my $token = $c->req->param('_token');
-$html =~ s/TOKEN/$token/g;
-
-$c->response->body($html);
+    $c->detach('error') unless $self->validate_token;
+    $c->forward('parse_html');
 }
 
-sub complete : Local : ValidateToken {
+sub complete : Local ValidateRemoveToken {
     my ( $self, $c ) = @_;
-    
-    my $success = <<HTML;
+
+    $c->stash->{html} = <<HTML;
 <html><body>SUCCESS</body></html>
 HTML
-    
-    my $fail = <<HTML;
-<html><body>FAIL</body></html>
+
+    $c->detach('error') unless $self->validate_token;
+    $c->forward('parse_html');
+}
+
+sub error : Local {
+    my ( $self, $c ) = @_;
+
+    my $html = <<HTML;
+<html><body>INVALID ACCESS</body></html>
 HTML
 
-    my $html = $self->validate_token ? $success : $fail;
-$c->response->body($html);
+    $c->response->body($html);
+}
+
+sub parse_html : Private {
+    my ( $self, $c ) = @_;
+    my $token = $c->req->param('_token');
+
+    my $html = $c->stash->{html};
+    $html =~ s/TOKEN/$token/g;
+    $c->response->body($html);
 }
 
 1;
