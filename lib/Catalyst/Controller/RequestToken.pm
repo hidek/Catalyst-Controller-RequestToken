@@ -2,8 +2,11 @@ package Catalyst::Controller::RequestToken;
 
 use strict;
 use warnings;
+use NEXT;
 
 use base qw(Catalyst::Controller);
+
+use Scalar::Util qw/weaken/;
 
 our $VERSION = '0.01';
 
@@ -13,9 +16,13 @@ __PACKAGE__->config(
 );
 
 sub ACCEPT_CONTEXT {
-    my ( $self, $c ) = @_;
+    my $self = shift;
+    my $c    = shift;
 
-    return bless { %$self, c => $c }, ref($self);
+    $self->{c} = $c;
+    weaken( $self->{c} );
+
+    return $self->NEXT::ACCEPT_CONTEXT($c, @_) || $self;
 }
 
 sub new {
@@ -66,7 +73,7 @@ requires Catalyst::Plugin::Session module, in your application class:
         Session
         Session::State::Cookie
         Session::Store::FastMmap
-        FillForm
+        FillInForm
      /;
 
 in your controller class:
