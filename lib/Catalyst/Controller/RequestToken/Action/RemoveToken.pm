@@ -5,17 +5,11 @@ use warnings;
 
 use base qw(Catalyst::Action);
 
-use Catalyst::Exception;
-use Class::C3;
-
 sub execute {
     my $self = shift;
     my ( $controller, $c, @args ) = @_;
 
-    $c->log->debug("remove token") if $c->debug;
-    my $conf = $controller->config;
-    undef $c->session->{ $conf->{session_name} };
-
+    $controller->remove_token;
     return $self->next::method(@_);
 }
 

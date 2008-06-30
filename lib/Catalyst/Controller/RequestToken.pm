@@ -3,17 +3,14 @@ package Catalyst::Controller::RequestToken;
 use strict;
 use warnings;
 
-
 use base qw(Catalyst::Controller);
 
+use Catalyst::Exception;
 use Scalar::Util qw/weaken/;
+use Class::C3;
+use Digest();
 
-our $VERSION = '0.01';
-
-__PACKAGE__->config(
-        session_name => '_token',
-        request_name => '_token',
-);
+our $VERSION = '0.02';
 
 sub ACCEPT_CONTEXT {
     my $self = shift;
@@ -22,55 +19,148 @@ sub ACCEPT_CONTEXT {
     $self->{c} = $c;
     weaken( $self->{c} );
 
-    return $self->NEXT::ACCEPT_CONTEXT($c, @_) || $self;
+    return $self->NEXT::ACCEPT_CONTEXT( $c, @_ ) || $self;
 }
 
 sub new {
     my $class = shift;
-    my $self  = $class->NEXT::new(@_);
+    my ( $c, $args ) = @_;
 
-    $self->_setup(@_);
-    return $self;
-}
-
-sub _setup {
-    my $self = shift;
-    my ($c) = @_;
-
-    $self->config(%{$self->config}, %{$c->config->{'Controller::RequestToken'}});
+    my $self = $class->next::method( $c, $args );
 
     Catalyst::Exception->throw("Catalyst::Plugin::Session is required")
         unless $c->isa('Catalyst::Plugin::Session');
+
+    my $config = {
+        session_name => '_token',
+        request_name => '_token',
+        %{ $c->config->{'Controller::RequestToken'} },
+        %{ $class->config },
+        %{$args},
+    };
+
+    $self->config($config);
+    return $self;
+}
+
+sub token {
+    my ( $self, $arg ) = @_;
+    my $c = $self->{c};
+
+    if ( defined $arg ) {
+        $c->session->{ $self->_ident() } = $arg;
+        return $arg;
+    }
+
+    return $c->session->{ $self->_ident() };
+}
+
+sub create_token {
+    my ( $self, $arg ) = @_;
+    my $c = $self->{c};
+
+    $c->log->debug("create token") if $c->debug;
+    my $digest = _find_digest();
+    my $seed = join( time, rand(10000), $$, {} );
+    $digest->add($seed);
+    my $token = $digest->hexdigest;
+    $c->log->debug("token is created: $token") if $c->debug;
+
+    return $self->token($token);
+}
+
+sub remove_token {
+    my ( $self, $arg ) = @_;
+    my $c = $self->{c};
+
+    $c->log->debug("remove token") if $c->debug;
+    undef $c->session->{$self->_ident()};
+    $self->token(undef);
 }
 
 sub validate_token {
-    my $self = shift;
+    my ( $self, $arg ) = @_;
+    my $c    = $self->{c};
+    my $conf = $self->config;
 
-    return $self->{c}->stash->{validate_token};
+    $c->log->debug('validate token') if $c->debug;
+    my $session = $self->token;
+    my $request = $c->req->param( $conf->{request_name} );
+
+    $c->log->debug("session: $session");
+    $c->log->debug("request: $request");
+
+    if ( ( $session && $request ) && $session eq $request ) {
+        $c->log->debug('token is valid') if $c->debug;
+         $c->stash->{$self->_ident()} = 1;
+    }
+    else {
+        $c->log->debug('token is invalid') if $c->debug;
+        if ( $c->isa('Catalyst::Plugin::FormValidator::Simple') ) {
+            $c->set_invalid_form( $conf->{request_name} => 'TOKEN' );
+        }
+        undef $c->stash->{$self->_ident()};
+    }
+}
+
+sub is_valid_token {
+    my ( $self, $arg ) = @_;
+    my $c    = $self->{c};
+
+    return $c->stash->{$self->_ident()};
+}
+
+sub _ident {    # secret stash key for this template'
+    return '__' . ref( $_[0] ) . '_token';
+}
+
+# following code is from Catalyst::Plugin::Session
+my $usable;
+
+sub _find_digest () {
+    unless ($usable) {
+        foreach my $alg (qw/SHA-256 SHA-1 MD5/) {
+            if ( eval { Digest->new($alg) } ) {
+                $usable = $alg;
+                last;
+            }
+        }
+        Catalyst::Exception->throw(
+                  "Could not find a suitable Digest module. Please install "
+                . "Digest::SHA1, Digest::SHA, or Digest::MD5" )
+            unless $usable;
+    }
+
+    return Digest->new($usable);
 }
 
 sub _parse_CreateToken_attr {
     my ( $self, $app_class, $action_name, $vaue, $attrs ) = @_;
 
-    return ( ActionClass => 'Catalyst::Controller::RequestToken::Action::CreateToken' );
+    return ( ActionClass =>
+            'Catalyst::Controller::RequestToken::Action::CreateToken' );
 }
 
 sub _parse_ValidateToken_attr {
     my ( $self, $app_class, $action_name, $vaue, $attrs ) = @_;
 
-    return ( ActionClass => 'Catalyst::Controller::RequestToken::Action::ValidateToken' );
+    return ( ActionClass =>
+            'Catalyst::Controller::RequestToken::Action::ValidateToken' );
 }
 
 sub _parse_RemoveToken_attr {
     my ( $self, $app_class, $action_name, $vaue, $attrs ) = @_;
 
-    return ( ActionClass => 'Catalyst::Controller::RequestToken::Action::RemoveToken' );
+    return ( ActionClass =>
+            'Catalyst::Controller::RequestToken::Action::RemoveToken' );
 }
 
 sub _parse_ValidateRemoveToken_attr {
     my ( $self, $app_class, $action_name, $vaue, $attrs ) = @_;
 
-    return ( ActionClass => 'Catalyst::Controller::RequestToken::Action::ValidateRemoveToken' );
+    return ( ActionClass =>
+            'Catalyst::Controller::RequestToken::Action::ValidateRemoveToken'
+    );
 }
 
 1;
@@ -96,19 +186,19 @@ in your controller class:
 
     use base qw(Catalyst::Controller::RequestToken);
     
-    sub form :Local {
+    sub form :CreateToken {
         my ($self, $c) = @_;
         $c->stash->{template} = 'form.tt';
         $c->forward($c->view('TT'));
     }
     
-    sub confirm :Local :CreateToken {
+    sub confirm :Local :ValidateToken {
         my ($self, $c) = @_;
         $c->stash->{template} = 'confirm.tt';
         $c->forward($c->view('TT'));
     }
     
-    sub complete :Local :ValidateToken {
+    sub complete :Local :ValidateRemoveToken {
         my ($self, $c) = @_;
         if ($self->validate_token) {
             $c->response->body('complete.');
@@ -122,6 +212,7 @@ form.tt
     <html>
     <body>
     <form action="confirm" method="post">
+    <input type="hidden" name="_token" values="[% c.req.param('_token') %]"/>
     <input type="submit" name="submit" value="confirm"/>
     </form>
     </body>
@@ -145,24 +236,50 @@ Using token, you can prevent duplicate submits, or protect from CSRF atack.
 
 This module REQUIRES Catalyst::Plugin::Session to store server side token.
 
-If you add CreateToken attribute to action, token will be created and stored
-into request and session. You can return a content with request token which
-should be posted to server.
+=head1 ATTRIBUTES
 
-If you add ValidateToken attribute, this will validate request token with 
-sever-side session token, and remove token from session.
+=over 4
 
-After ValidateToken, there is any token in session, so validation will be
-failed, if user request with expired token.
+=item CreateToken
+
+Creates new token and put it into request and session. 
+You can return a content with request token which should be posted 
+to server.
+
+=item ValidateToken
+
+After CreateToken, clients will post token request, so you need
+validate it correct or not.
+
+ValidateToken attribute validates request token with session token 
+which is created by CreateToken attribute.
+
+=item RemoveToken
+
+Removes token from session, then request token will be invalid any more.
+
+= item ValidateRemoveToken 
+Works as combination of ValidateToken and RemoveToken.
+This will be useful for the last part of transaction.
+
+=back
 
 =head1 METHODS
 
 =over 4
 
+=item token
+
+=item create_token
+
+=item remove_token
+
 =item validate_token
 
 Return token is valid or not.  This will work collectlly only after
 ValidateToken.
+
+=item is_valid_token
 
 =back
 
@@ -182,6 +299,10 @@ in your application class:
 Default: _token
 
 =item request_name
+
+Default: _token
+
+=item validate_stash_name
 
 Default: _token
 

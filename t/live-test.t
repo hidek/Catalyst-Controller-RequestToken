@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-#use Test::More tests => 15;
 use Test::More qw(no_plan);
 
 # setup library path
@@ -23,14 +22,13 @@ $mech->content_like(qr/FORM/i, 'see if it has our text');
 
 $mech->submit_form_ok({}, 'submit form');
 $mech->content_like(qr/CONFIRM/i, 'see if it has our text');
-$mech->content;
 
 $mech->submit_form_ok({}, 'submit form');
 $mech->content_like(qr/SUCCESS/i, 'see if it has our text');
 
 $mech->reload;
 $mech->content_like(qr/INVALID ACCESS/i, 'see if it has our text');
-
+=cut
 $mech->back;
 $mech->content_like(qr/CONFIRM/i, 'see if it has our text');
 
@@ -45,4 +43,4 @@ $mech->submit;
 $mech->content_like(qr/CONFIRM/i, 'see if it has our text');
 $mech->submit;
 $mech->content_like(qr/SUCCESS/i, 'see if it has our text');
-
+=cut
