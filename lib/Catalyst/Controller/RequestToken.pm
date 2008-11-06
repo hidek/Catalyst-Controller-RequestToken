@@ -7,7 +7,7 @@ use base qw(Catalyst::Controller);
 
 use Scalar::Util qw/weaken/;
 use Class::C3;
-use Digest();
+use Digest;
 
 our $VERSION = '0.02';
 

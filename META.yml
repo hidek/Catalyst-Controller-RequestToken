@@ -8,7 +8,6 @@ build_requires:
   Catalyst::Plugin::Session::State::Cookie: 0
   Catalyst::Runtime: 0
   Test::More: 0
-  Test::WWW::Mechanize::Catalyst: 0
   ok: 0
 distribution_type: module
 generated_by: 'Module::Install version 0.77'
@@ -21,6 +20,10 @@ no_index:
   directory:
     - inc
     - t
+requires:
+  Class::C3: 0
+  Digest: 0
+  Scalar::Util: 0
 resources:
   license: http://dev.perl.org/licenses/
 version: 0.02
