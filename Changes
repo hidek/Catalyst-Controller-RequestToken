@@ -1,5 +1,8 @@
+0.03	Wed Nov  6 18:00:32 JST 2008
+		- modified Changes
 0.02	Fri Jun  6 11:37:31 JST 2008
-		
+		- fully refactored
+		- weaken context (thx to typester)
 0.01	Thu Jun  5  0:32:10 JST 2008
 		- first release
 
