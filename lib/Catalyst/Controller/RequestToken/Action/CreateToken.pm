@@ -41,7 +41,7 @@ L<Catalyst::Action>
 
 =head1 AUTHOR
 
-Hideo Kimura C<< <<hide@hide-k.net>> >>
+Hideo Kimura C<< <<hide<at>hide-k.net>> >>
 
 =head1 COPYRIGHT
 
@@ -52,5 +52,4 @@ The full text of the license can be found in the
 LICENSE file included with this module.
 
 =cut
-
 

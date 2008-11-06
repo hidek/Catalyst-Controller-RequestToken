@@ -42,7 +42,7 @@ L<Catalyst::Action>
 
 =head1 AUTHOR
 
-Hideo Kimura C<< <<hide@hide-k.net>> >>
+Hideo Kimura C<< <<hide<at>hide-k.net>> >>
 
 =head1 COPYRIGHT
 
