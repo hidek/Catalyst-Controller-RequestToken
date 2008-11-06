@@ -10,6 +10,7 @@ sub execute {
     my ( $controller, $c, @args ) = @_;
 
     $controller->validate_token;
+    $controller->remove_token;
     return $self->next::method(@_);
 }
 

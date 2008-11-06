@@ -5,7 +5,6 @@ use warnings;
 
 use base qw(Catalyst::Controller);
 
-use Catalyst::Exception;
 use Scalar::Util qw/weaken/;
 use Class::C3;
 use Digest();
@@ -13,8 +12,7 @@ use Digest();
 our $VERSION = '0.02';
 
 sub ACCEPT_CONTEXT {
-    my $self = shift;
-    my $c    = shift;
+    my ($self, $c) = @_;
 
     $self->{c} = $c;
     weaken( $self->{c} );
@@ -45,6 +43,7 @@ sub new {
 
 sub token {
     my ( $self, $arg ) = @_;
+
     my $c = $self->{c};
 
     if ( defined $arg ) {
@@ -57,6 +56,7 @@ sub token {
 
 sub create_token {
     my ( $self, $arg ) = @_;
+
     my $c = $self->{c};
 
     $c->log->debug("create token") if $c->debug;
@@ -71,6 +71,7 @@ sub create_token {
 
 sub remove_token {
     my ( $self, $arg ) = @_;
+
     my $c = $self->{c};
 
     $c->log->debug("remove token") if $c->debug;
@@ -80,6 +81,7 @@ sub remove_token {
 
 sub validate_token {
     my ( $self, $arg ) = @_;
+
     my $c    = $self->{c};
     my $conf = $self->config;
 
@@ -105,6 +107,7 @@ sub validate_token {
 
 sub is_valid_token {
     my ( $self, $arg ) = @_;
+
     my $c    = $self->{c};
 
     return $c->stash->{$self->_ident()};
@@ -329,7 +332,7 @@ L<Catalyst::Plugin::FormValidator::Simple>
 
 =head1 AUTHOR
 
-Hideo Kimura C<< <<hide@hide-k.net>> >>
+Hideo Kimura C<< <<hide<at>hide-k.net>> >>
 
 =head1 COPYRIGHT
 

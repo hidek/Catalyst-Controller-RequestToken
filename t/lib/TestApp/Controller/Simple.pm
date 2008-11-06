@@ -25,10 +25,10 @@ HTML
     $c->response->body($html);
 }
 
-sub confirm : Local ValidateToken {
+sub confirm : Local {
     my ( $self, $c ) = @_;
 
-    $c->detach('error') unless $self->is_valid_token;
+    #$c->detach('error') unless $self->is_valid_token;
     my $html = <<HTML;
 <html>
 <body>
@@ -45,7 +45,7 @@ HTML
     $c->response->body($html);
 }
 
-sub complete : Local ValidateRemoveToken {
+sub complete : Local ValidateToken {
     my ( $self, $c ) = @_;
 
     $c->detach('error') unless $self->is_valid_token;

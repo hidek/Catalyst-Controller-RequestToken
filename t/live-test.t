@@ -15,32 +15,32 @@ use ok 'TestApp';
 use Test::WWW::Mechanize::Catalyst 'TestApp';
 my $mech = Test::WWW::Mechanize::Catalyst->new;
 $mech->get_ok('http://localhost/', 'get main page');
-$mech->content_like(qr/it works/i, 'see if it has our text');
+$mech->content_like(qr/it works/i, 'index page');
 
 $mech->get_ok('http://localhost/simple/form', 'get main page');
-$mech->content_like(qr/FORM/i, 'see if it has our text');
+$mech->content_like(qr/FORM/i, 'form page - valid');
 
 $mech->submit_form_ok({}, 'submit form');
-$mech->content_like(qr/CONFIRM/i, 'see if it has our text');
+$mech->content_like(qr/CONFIRM/i, 'submit to confirm page - valid');
 
 $mech->submit_form_ok({}, 'submit form');
-$mech->content_like(qr/SUCCESS/i, 'see if it has our text');
+$mech->content_like(qr/SUCCESS/i, 'submit to success page - valid');
 
 $mech->reload;
-$mech->content_like(qr/INVALID ACCESS/i, 'see if it has our text');
-=cut
+$mech->content_like(qr/INVALID ACCESS/i, 'reload on success page - invalid');
+
 $mech->back;
-$mech->content_like(qr/CONFIRM/i, 'see if it has our text');
+$mech->content_like(qr/CONFIRM/i, 'back to confirm page - valid');
 
 $mech->submit;
-$mech->content_like(qr/INVALID ACCESS/i, 'see if it has our text');
+$mech->content_like(qr/INVALID ACCESS/i, 'submit to success page - invalid');
 
 $mech->back;
 $mech->back;
 $mech->reload;
-$mech->content_like(qr/FORM/i, 'see if it has our text');
+$mech->content_like(qr/FORM/i, 'back to form page - valid');
 $mech->submit;
-$mech->content_like(qr/CONFIRM/i, 'see if it has our text');
+$mech->content_like(qr/CONFIRM/i, 'submit to confirm page - valid');
 $mech->submit;
-$mech->content_like(qr/SUCCESS/i, 'see if it has our text');
+$mech->content_like(qr/SUCCESS/i, 'submit to success page - valid');
 =cut
