@@ -4,7 +4,7 @@ use warnings;
 
 use base 'Catalyst::Controller::RequestToken';
 
-sub form : Local CreateToken {
+sub form : Local : CreateToken {
     my ( $self, $c ) = @_;
 
     my $html = <<HTML;
@@ -45,7 +45,7 @@ HTML
     $c->response->body($html);
 }
 
-sub complete : Local ValidateToken {
+sub complete : Local : ValidateToken {
     my ( $self, $c ) = @_;
 
     $c->detach('error') unless $self->is_valid_token;

@@ -189,19 +189,19 @@ in your controller class:
 
     use base qw(Catalyst::Controller::RequestToken);
     
-    sub form :CreateToken {
+    sub form :Local {
         my ($self, $c) = @_;
         $c->stash->{template} = 'form.tt';
         $c->forward($c->view('TT'));
     }
     
-    sub confirm :Local :ValidateToken {
+    sub confirm :Local :CreateToken {
         my ($self, $c) = @_;
         $c->stash->{template} = 'confirm.tt';
         $c->forward($c->view('TT'));
     }
     
-    sub complete :Local :ValidateRemoveToken {
+    sub complete :Local :ValidateToken {
         my ($self, $c) = @_;
         if ($self->validate_token) {
             $c->response->body('complete.');
@@ -215,7 +215,6 @@ form.tt
     <html>
     <body>
     <form action="confirm" method="post">
-    <input type="hidden" name="_token" values="[% c.req.param('_token') %]"/>
     <input type="submit" name="submit" value="confirm"/>
     </form>
     </body>
@@ -257,13 +256,11 @@ validate it correct or not.
 ValidateToken attribute validates request token with session token 
 which is created by CreateToken attribute.
 
+If token is valid, server-side token will be expired.
+
 =item RemoveToken
 
 Removes token from session, then request token will be invalid any more.
-
-= item ValidateRemoveToken 
-Works as combination of ValidateToken and RemoveToken.
-This will be useful for the last part of transaction.
 
 =back
 
