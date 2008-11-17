@@ -4,13 +4,14 @@ use strict;
 use warnings;
 
 use base qw(Catalyst::Action);
+use Class::C3;
 
 sub execute {
     my $self = shift;
     my ( $controller, $c, @args ) = @_;
 
     $controller->create_token;
-    return $self->NEXT::execute(@_);
+    return $self->next::method(@_);
 }
 
 1;

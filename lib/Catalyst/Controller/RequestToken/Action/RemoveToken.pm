@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use base qw(Catalyst::Action);
+use Class::C3;
 
 sub execute {
     my $self = shift;

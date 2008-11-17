@@ -17,7 +17,7 @@ sub ACCEPT_CONTEXT {
     $self->{c} = $c;
     weaken( $self->{c} );
 
-    return $self->NEXT::ACCEPT_CONTEXT( $c, @_ ) || $self;
+    return $self->maybe::next::method( $c, @_ ) || $self;
 }
 
 sub new {
@@ -29,15 +29,9 @@ sub new {
     Catalyst::Exception->throw("Catalyst::Plugin::Session is required")
         unless $c->isa('Catalyst::Plugin::Session');
 
-    my $config = {
-        session_name => '_token',
-        request_name => '_token',
-        %{ $c->config->{'Controller::RequestToken'} },
-        %{ $class->config },
-        %{$args},
-    };
+    $self->{session_name} ||= '_token';
+    $self->{request_name} ||= '_token';
 
-    $self->config($config);
     return $self;
 }
 
@@ -82,12 +76,11 @@ sub remove_token {
 sub validate_token {
     my ( $self, $arg ) = @_;
 
-    my $c    = $self->{c};
-    my $conf = $self->config;
+    my $c = $self->{c};
 
     $c->log->debug('validate token') if $c->debug;
     my $session = $self->token;
-    my $request = $c->req->param( $conf->{request_name} );
+    my $request = $c->req->param( $self->{request_name} );
 
     $c->log->debug("session: $session");
     $c->log->debug("request: $request");
@@ -99,7 +92,7 @@ sub validate_token {
     else {
         $c->log->debug('token is invalid') if $c->debug;
         if ( $c->isa('Catalyst::Plugin::FormValidator::Simple') ) {
-            $c->set_invalid_form( $conf->{request_name} => 'TOKEN' );
+            $c->set_invalid_form( $self->{request_name} => 'TOKEN' );
         }
         undef $c->stash->{$self->_ident()};
     }
@@ -287,7 +280,7 @@ ValidateToken.
 
 in your application class:
 
-    __PACKAGE__->config('Controller::RequestToken' => {
+    __PACKAGE__->config('Controller::TokenBasedMyController' => {
         session_name => '_token',
         request_name => '_token',
     });
