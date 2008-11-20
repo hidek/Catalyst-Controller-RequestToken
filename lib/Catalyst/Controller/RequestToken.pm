@@ -9,7 +9,7 @@ use Scalar::Util qw/weaken/;
 use Class::C3;
 use Digest;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 sub ACCEPT_CONTEXT {
     my ( $self, $c ) = @_;
