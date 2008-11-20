@@ -12,7 +12,7 @@ use Digest;
 our $VERSION = '0.03';
 
 sub ACCEPT_CONTEXT {
-    my ($self, $c) = @_;
+    my ( $self, $c ) = @_;
 
     $self->{c} = $c;
     weaken( $self->{c} );
@@ -69,7 +69,7 @@ sub remove_token {
     my $c = $self->{c};
 
     $c->log->debug("remove token") if $c->debug;
-    undef $c->session->{$self->_ident()};
+    undef $c->session->{ $self->_ident() };
     $self->token(undef);
 }
 
@@ -82,28 +82,28 @@ sub validate_token {
     my $session = $self->token;
     my $request = $c->req->param( $self->{request_name} );
 
-    $c->log->debug("session: $session");
-    $c->log->debug("request: $request");
+    $c->log->debug( "session:" . ( $session ? $session : '' ) );
+    $c->log->debug( "request:" . ( $request ? $request : '' ) );
 
     if ( ( $session && $request ) && $session eq $request ) {
         $c->log->debug('token is valid') if $c->debug;
-         $c->stash->{$self->_ident()} = 1;
+        $c->stash->{ $self->_ident() } = 1;
     }
     else {
         $c->log->debug('token is invalid') if $c->debug;
         if ( $c->isa('Catalyst::Plugin::FormValidator::Simple') ) {
             $c->set_invalid_form( $self->{request_name} => 'TOKEN' );
         }
-        undef $c->stash->{$self->_ident()};
+        undef $c->stash->{ $self->_ident() };
     }
 }
 
 sub is_valid_token {
     my ( $self, $arg ) = @_;
 
-    my $c    = $self->{c};
+    my $c = $self->{c};
 
-    return $c->stash->{$self->_ident()};
+    return $c->stash->{ $self->_ident() };
 }
 
 sub _ident {    # secret stash key for this template'
