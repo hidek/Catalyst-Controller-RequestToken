@@ -6,10 +6,10 @@ use warnings;
 use base qw(Catalyst::Controller);
 
 use Scalar::Util qw/weaken/;
-use Class::C3;
+use MRO::Compat;
 use Digest;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 sub ACCEPT_CONTEXT {
     my ( $self, $c ) = @_;

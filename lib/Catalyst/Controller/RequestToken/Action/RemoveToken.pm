@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use base qw(Catalyst::Action);
-use Class::C3;
+use MRO::Compat;
 
 sub execute {
     my $self = shift;
