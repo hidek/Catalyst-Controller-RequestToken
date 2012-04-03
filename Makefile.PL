@@ -12,4 +12,8 @@ build_requires 'Catalyst::Action::RenderView';
 test_requires 'Test::More';
 test_requires 'ok';
 
+resources(
+    repository => "git://github.com/hidek/Catalyst-Controller-RequestToken.git",
+);
+
 WriteAll();
