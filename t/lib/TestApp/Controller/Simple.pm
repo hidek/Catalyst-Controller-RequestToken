@@ -20,7 +20,7 @@ FORM
 </html>
 HTML
 
-    my $token = $self->token;
+    my $token = $self->token($c);
     $html =~ s/TOKEN/$token/g;
     $c->response->body($html);
 }
@@ -48,7 +48,7 @@ HTML
 sub complete : Local : ValidateToken {
     my ( $self, $c ) = @_;
 
-    $c->detach('error') unless $self->is_valid_token;
+    $c->detach('error') unless $self->is_valid_token($c);
     my $html = <<HTML;
 <html><body>SUCCESS</body></html>
 HTML
