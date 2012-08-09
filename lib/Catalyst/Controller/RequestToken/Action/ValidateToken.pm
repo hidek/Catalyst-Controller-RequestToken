@@ -10,8 +10,8 @@ sub execute {
     my $self = shift;
     my ( $controller, $c, @args ) = @_;
 
-    $controller->validate_token;
-    $controller->remove_token;
+    $controller->validate_token($c);
+    $controller->remove_token($c);
     return $self->next::method(@_);
 }
 

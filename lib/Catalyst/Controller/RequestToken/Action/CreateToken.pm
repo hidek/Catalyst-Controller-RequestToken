@@ -10,7 +10,7 @@ sub execute {
     my $self = shift;
     my ( $controller, $c, @args ) = @_;
 
-    $controller->create_token;
+    $controller->create_token($c);
     return $self->next::method(@_);
 }
 
