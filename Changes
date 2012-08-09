@@ -1,7 +1,7 @@
-0.07   Thu Aug  9 17:40:43 JST 2012
+0.07    Thu Aug  9 17:40:43 JST 2012
 		- fix documentation (thanks to mannih)
 		- fix problems in pre-fork environment (thanks to bobtfish)
-0.06   Wed May 27 16:06:31 JST 2009
+0.06    Wed May 27 16:06:31 JST 2009
 		- turn off some debug messages (thanks to nekoya)
 0.05	Tue Apr 21 12:04:10 JST 2009
 		- use MRO::Compat instead of NEXT
